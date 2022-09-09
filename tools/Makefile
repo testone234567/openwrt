@@ -26,17 +26,31 @@ tools-y += e2fsprogs fakeroot findutils firmware-utils flex gengetopt
 tools-y += libressl libtool lzma m4 make-ext4fs meson missing-macros mkimage
 tools-y += mklibs mtd-utils mtools ninja padjffs2 patch-image
 tools-y += patchelf pkgconf quilt squashfskit4 sstrip zip zlib zstd
-tools-$(BUILD_B43_TOOLS) += b43-tools
-tools-$(BUILD_ISL) += isl
-tools-$(BUILD_TOOLCHAIN) += expat gmp mpc mpfr
-tools-$(CONFIG_TARGET_apm821xx)$(CONFIG_TARGET_gemini) += genext2fs
-tools-$(CONFIG_TARGET_ath79) += lzma-old squashfs
-tools-$(CONFIG_TARGET_mxs) += elftosb sdimage
-tools-$(CONFIG_TARGET_realtek) += 7z
-tools-$(CONFIG_TARGET_tegra) += cbootimage cbootimage-configs
-tools-$(CONFIG_USES_MINOR) += kernel2minor
-tools-$(CONFIG_USE_SPARSE) += sparse
-tools-$(CONFIG_USE_LLVM_BUILD) += llvm-bpf
+ifeq ($(CONFIG_BUILD_ALL_HOST_TOOLS),)
+  tools-$(BUILD_B43_TOOLS) += b43-tools
+  tools-$(BUILD_TOOLCHAIN) += expat gmp mpc mpfr
+  tools-$(BUILD_ISL) += isl
+  tools-$(CONFIG_TARGET_apm821xx)$(CONFIG_TARGET_gemini) += genext2fs
+  tools-$(CONFIG_TARGET_ath79) += lzma-old squashfs
+  tools-$(CONFIG_TARGET_mxs) += elftosb sdimage
+  tools-$(CONFIG_TARGET_realtek) += 7z
+  tools-$(CONFIG_TARGET_tegra) += cbootimage cbootimage-configs
+  tools-$(CONFIG_USES_MINOR) += kernel2minor
+  tools-$(CONFIG_USE_SPARSE) += sparse
+  tools-$(CONFIG_USE_LLVM_BUILD) += llvm-bpf
+else
+  tools-y += b43-tools
+  tools-y += expat gmp mpc mpfr
+  tools-y += isl
+  tools-y += genext2fs
+  tools-y += lzma-old squashfs
+  tools-y += elftosb sdimage
+  tools-y += 7z
+  tools-y += cbootimage cbootimage-configs
+  tools-y += kernel2minor
+  tools-y += sparse
+  tools-y += llvm-bpf
+endif
 
 # builddir dependencies
 $(curdir)/autoconf/compile := $(curdir)/m4/compile
@@ -87,7 +101,11 @@ ifeq ($(HOST_OS),Darwin)
 else
   $(curdir)/dwarves/compile += $(curdir)/elfutils/compile
   $(curdir)/elfutils/compile := $(curdir)/m4/compile $(curdir)/zlib/compile
+ifeq ($(CONFIG_BUILD_ALL_HOST_TOOLS),)
   tools-$(CONFIG_DWARVES) += dwarves
+else
+  tools-y += dwarves
+endif
   tools-y += elfutils
 endif
 
