@@ -65,6 +65,7 @@ jobs:
             if echo "$body" | grep -v "Signed-off-by:"; then
               success "A commit message exists"
             else
+              echo ::error title={Missing commit message}::{Please describe your changes}
               err "Missing commit message. Please describe your changes"
               RET=1
             fi
