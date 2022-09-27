@@ -58,6 +58,7 @@ jobs:
             if echo "$body" | grep -qF "$sob"; then
               success "Signed-off-by match author"
             else
+
               err "Signed-off-by is missing or doesn't match author (should be '$sob')"
               RET=1
             fi
