@@ -3,6 +3,9 @@ name: Build host tools
 on:
   workflow_call:
     inputs:
+      container:
+        type: string
+        default: registry.gitlab.com/openwrt/buildbot/buildworker-3.4.1
       generate_prebuilt_artifacts:
         type: boolean
 
@@ -13,7 +16,7 @@ jobs:
   build:
     name: Build tools
     runs-on: ubuntu-latest
-    container: registry.gitlab.com/openwrt/buildbot/buildworker-3.4.1
+    container: ${{ inputs.container }}
 
     steps:
       - name: Checkout
