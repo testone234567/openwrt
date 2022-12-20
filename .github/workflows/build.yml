@@ -22,6 +22,10 @@ on:
         type: boolean
       build_all_boards:
         type: boolean
+      build_external_toolchain:
+        type: boolean
+      upload_external_toolchain:
+        type: boolean
 
 permissions:
   contents: read
@@ -357,9 +361,32 @@ jobs:
         working-directory: openwrt
         run: make -j$(nproc) BUILD_LOG=1 || ret=$? .github/workflows/scripts/show_build_failures.sh
 
+      - name: Build external toolchain
+        if: inputs.build_external_toolchain == true
+        shell: su buildbot -c "sh -e {0}"
+        working-directory: openwrt
+        run: make target/toolchain/compile -j$(nproc) BUILD_LOG=1 || ret=$? .github/workflows/scripts/show_build_failures.sh
+
       - name: Upload logs
         if: failure()
         uses: actions/upload-artifact@v3
         with:
           name: ${{ env.TARGET }}-${{ env.SUBTARGET }}-logs
           path: "openwrt/logs"
+
+      - name: Find external toolchain name
+        if: inputs.upload_external_toolchain == true
+        working-directory: openwrt
+        run: |
+          SUBTARGET_DIR=$(ls bin/targets/${{ env.TARGET }} | grep ${{ env.SUBTARGET }})
+          TOOLCHAIN_NAME=$(ls bin/targets/${{ env.TARGET }}/$SUBTARGET_DIR | grep toolchain)
+          echo "SUBTARGET_DIR=$SUBTARGET_DIR" >> "$GITHUB_ENV"
+          echo "TOOLCHAIN_NAME=$TOOLCHAIN_NAME" >> "$GITHUB_ENV"
+
+      - name: Upload prebuilt toolchain
+        if: inputs.upload_external_toolchain == true
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ env.TARGET }}-${{ env.SUBTARGET }}-external-toolchain
+          path: openwrt/bin/targets/${{ env.TARGET }}/${{ env.SUBTARGET_DIR }}/${{ env.TOOLCHAIN_NAME }}
+          retention-days: 1
