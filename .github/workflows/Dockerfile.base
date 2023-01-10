@@ -1,0 +1,6 @@
+FROM alpine:latest
+
+RUN apk add --no-cache gcc g++ ncurses-dev git rsync perl tar bash patch findutils diffutils grep gzip unzip bzip2 wget python3 file which make gawk coreutils linux-headers argp-standalone musl-fts-dev musl-obstack-dev musl-libintl
+RUN adduser -D buildbot
+
+WORKDIR /home/buildbot
