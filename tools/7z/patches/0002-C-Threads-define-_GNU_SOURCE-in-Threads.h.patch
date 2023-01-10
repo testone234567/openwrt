@@ -1,0 +1,56 @@
+From 8bdad09663ee40ee8566ed04991b8a31d6c6c8c3 Mon Sep 17 00:00:00 2001
+From: Christian Marangi <ansuelsmth@gmail.com>
+Date: Wed, 11 Jan 2023 01:17:37 +0100
+Subject: [PATCH 2/2] C: Threads: define _GNU_SOURCE in Threads.h
+
+Move _GNU_SOURCE from Threads.c to Threads.h as it's also used by MtDec.h and
+cause compilation error for unknown type name 'cpu_set_t' with musl
+libc.
+
+Signed-off-by: Christian Marangi <ansuelsmth@gmail.com>
+---
+ C/Threads.c | 12 ++++++------
+ C/Threads.h |  4 +++-
+ 2 files changed, 9 insertions(+), 7 deletions(-)
+
+diff --git a/C/Threads.c b/C/Threads.c
+index a6abe4b2..0f58c3cf 100644
+--- a/C/Threads.c
++++ b/C/Threads.c
+@@ -192,12 +192,12 @@ WRes CriticalSection_Init(CCriticalSection *p)
+ 
+ // ---------- POSIX ----------
+ 
+-#ifndef __APPLE__
+-#ifndef _7ZIP_AFFINITY_DISABLE
+-// _GNU_SOURCE can be required for pthread_setaffinity_np() / CPU_ZERO / CPU_SET
+-#define _GNU_SOURCE
+-#endif
+-#endif
++// #ifndef __APPLE__
++// #ifndef _7ZIP_AFFINITY_DISABLE
++// // _GNU_SOURCE can be required for pthread_setaffinity_np() / CPU_ZERO / CPU_SET
++// #define _GNU_SOURCE
++// #endif
++// #endif
+ 
+ #include "Threads.h"
+ 
+diff --git a/C/Threads.h b/C/Threads.h
+index e9493aff..92d8e50b 100644
+--- a/C/Threads.h
++++ b/C/Threads.h
+@@ -13,7 +13,9 @@
+ #ifndef _7ZIP_AFFINITY_DISABLE
+ #define _7ZIP_AFFINITY_SUPPORTED
+ // #pragma message(" ==== _7ZIP_AFFINITY_SUPPORTED")
+-// #define _GNU_SOURCE
++#ifndef _GNU_SOURCE
++#define _GNU_SOURCE
++#endif
+ #endif
+ #endif
+ #endif
+-- 
+2.37.2
+

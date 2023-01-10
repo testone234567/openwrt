@@ -1,0 +1,66 @@
+From 585d5fe3b20213215cac4dc5a1a2b336f4a7a2a9 Mon Sep 17 00:00:00 2001
+From: Christian Marangi <ansuelsmth@gmail.com>
+Date: Wed, 11 Jan 2023 01:06:43 +0100
+Subject: [PATCH 1/2] C: Threads: use pthread_setaffinity portable variant
+
+Musl libc doesn't have pthread_attr_setaffinity_np. Use the
+pthread_setaffinity_np variant that is more portable and compatible with
+glibc and musl libc.
+
+Signed-off-by: Christian Marangi <ansuelsmth@gmail.com>
+---
+ C/Threads.c | 11 +++++++----
+ 1 file changed, 7 insertions(+), 4 deletions(-)
+
+diff --git a/C/Threads.c b/C/Threads.c
+index 6eb45b08..a6abe4b2 100644
+--- a/C/Threads.c
++++ b/C/Threads.c
+@@ -234,10 +234,11 @@ WRes Thread_Create_With_CpuSet(CThread *p, THREAD_FUNC_TYPE func, LPVOID param,
+ 
+   if (!ret)
+   {
++    /*
+     if (cpuSet)
+     {
+       #ifdef _7ZIP_AFFINITY_SUPPORTED
+-      
++    */
+       /*
+       printf("\n affinity :");
+       unsigned i;
+@@ -255,26 +256,28 @@ WRes Thread_Create_With_CpuSet(CThread *p, THREAD_FUNC_TYPE func, LPVOID param,
+       }
+       printf("\n");
+       */
+-
++    /*
+       // ret2 =
+       pthread_attr_setaffinity_np(&attr, sizeof(*cpuSet), cpuSet);
+       // if (ret2) ret = ret2;
+       #endif
+     }
++    */
+     
+     ret = pthread_create(&p->_tid, &attr, func, param);
+     
+     if (!ret)
+     {
+       p->_created = 1;
+-      /*
+       if (cpuSet)
+       {
++        #ifdef _7ZIP_AFFINITY_SUPPORTED
++
+         // ret2 =
+         pthread_setaffinity_np(p->_tid, sizeof(*cpuSet), cpuSet);
+         // if (ret2) ret = ret2;
++        #endif
+       }
+-      */
+     }
+   }
+   // ret2 =
+-- 
+2.37.2
+
