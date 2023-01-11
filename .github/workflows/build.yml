@@ -1,6 +1,6 @@
 name: Build sub target
 
-on:
+on: 
   workflow_call:
     inputs:
       container_name:
